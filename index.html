@@ -6,7 +6,7 @@
   <title>Insulin Dose Calculator</title>
 
   <style>
-    :root{
+    :root {
       --bg: #f4f6f8;
       --card: #ffffff;
       --text: #1f2937;
@@ -34,14 +34,11 @@
     }
 
     .page {
-      max-width: 1100px;
+      max-width: 1120px;
       margin: 0 auto;
     }
 
-    .header-card,
-    .controls-card,
-    .table-card,
-    .result-card {
+    .card {
       background: var(--card);
       border: 1px solid rgba(0,0,0,0.05);
       border-radius: var(--radius);
@@ -98,6 +95,10 @@
       width: 100%;
     }
 
+    input[type="number"] {
+      text-align: left;
+    }
+
     .mode-toggle {
       display: flex;
       gap: 10px;
@@ -105,17 +106,17 @@
       margin-top: 8px;
     }
 
-    .mode-btn, .action-btn {
+    .mode-btn, .action-btn, .calc-btn, .apply-btn {
       border: none;
       padding: 11px 14px;
       cursor: pointer;
       transition: transform .05s ease, background .2s ease, opacity .2s ease;
+      font-weight: 700;
     }
 
     .mode-btn {
       background: #e5e7eb;
       color: #111827;
-      font-weight: 700;
     }
 
     .mode-btn.active {
@@ -123,11 +124,11 @@
       color: #fff;
     }
 
-    .mode-btn:hover, .action-btn:hover {
+    .mode-btn:hover, .action-btn:hover, .calc-btn:hover, .apply-btn:hover {
       opacity: 0.96;
     }
 
-    .mode-btn:active, .action-btn:active {
+    .mode-btn:active, .action-btn:active, .calc-btn:active, .apply-btn:active {
       transform: translateY(1px);
     }
 
@@ -141,7 +142,6 @@
     .action-btn {
       background: #111827;
       color: white;
-      font-weight: 700;
     }
 
     .action-btn.secondary {
@@ -151,10 +151,8 @@
     .calc-btn {
       background: var(--primary);
       color: white;
-      font-weight: 800;
       width: 100%;
       padding: 13px 14px;
-      border: none;
       margin-top: 6px;
     }
 
@@ -195,6 +193,7 @@
       margin-top: 6px;
       color: var(--muted);
       font-size: 0.95rem;
+      line-height: 1.4;
     }
 
     .table-card {
@@ -202,31 +201,16 @@
       margin-top: 18px;
     }
 
-    .protocol-wrap {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 18px;
-    }
-
-    .protocol {
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      overflow: hidden;
-      background: #fff;
-    }
-
-    .protocol.hidden {
-      display: none;
-    }
-
     .protocol-head {
       padding: 14px 16px;
-      border-bottom: 1px solid var(--border);
+      border: 1px solid var(--border);
+      border-radius: 14px 14px 0 0;
       display: flex;
       justify-content: space-between;
       gap: 12px;
       align-items: center;
       flex-wrap: wrap;
+      background: #fff;
     }
 
     .protocol-name {
@@ -260,6 +244,14 @@
       margin-right: 4px;
     }
 
+    .export-area {
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 14px 14px;
+      overflow: hidden;
+      background: #fff;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
@@ -284,17 +276,70 @@
       min-width: 220px;
     }
 
-    .dose-low    { background: var(--green); }
-    .dose-med    { background: var(--yellow); }
-    .dose-high   { background: var(--orange); }
+    .dose-low     { background: var(--green); }
+    .dose-med     { background: var(--yellow); }
+    .dose-high    { background: var(--orange); }
     .dose-veryhigh { background: var(--red); }
-    .dose-max    { background: var(--darkred); color: #fff; }
+    .dose-max     { background: var(--darkred); color: #fff; }
 
     .footer-note {
       margin-top: 12px;
       font-size: 0.9rem;
       color: var(--muted);
       line-height: 1.45;
+    }
+
+    .editor-card {
+      margin-top: 18px;
+      padding: 18px;
+    }
+
+    .editor-head {
+      margin-bottom: 12px;
+    }
+
+    .editor-title {
+      margin: 0 0 5px;
+      font-size: 1.05rem;
+      font-weight: 800;
+    }
+
+    .editor-sub {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.93rem;
+      line-height: 1.45;
+    }
+
+    .editor-table input {
+      width: 100%;
+      min-width: 72px;
+      text-align: center;
+      border: 1px solid var(--border);
+      padding: 10px 8px;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .editor-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .apply-btn {
+      background: #059669;
+      color: #fff;
+    }
+
+    .apply-btn:hover {
+      background: #047857;
+    }
+
+    .small-btn {
+      background: #6b7280;
+      color: #fff;
     }
 
     .error {
@@ -310,6 +355,16 @@
 
     .error.show {
       display: block;
+    }
+
+    details {
+      margin-top: 16px;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 800;
+      padding: 10px 0;
     }
 
     @media (max-width: 760px) {
@@ -329,15 +384,16 @@
         background: #fff;
         padding: 0;
       }
-      .controls-card, .action-row, .note {
+      .controls-card, .editor-card, .action-row, .note, details {
         display: none !important;
       }
-      .header-card, .table-card, .result-card {
+      .card {
         box-shadow: none;
         border: none;
       }
       .table-card {
         margin-top: 0;
+        padding-top: 0;
       }
     }
   </style>
@@ -345,14 +401,14 @@
 
 <body>
   <div class="page">
-    <div class="header-card">
+    <div class="card header-card">
       <h1>Insulin Dose Calculator</h1>
       <p class="subtitle">
-        Local clinical reference tool with selectable protocol mode, color-coded dose table, and export options.
+        Meal-bin dosing with selectable protocol mode, editable values for clinician review, and exportable heatmapped tables.
       </p>
     </div>
 
-    <div class="controls-card">
+    <div class="card controls-card">
       <div class="grid">
         <div class="field">
           <label for="bg">Blood Glucose (mg/dL)</label>
@@ -388,122 +444,56 @@
         ⚠️ Clinical decision support only. Follow institutional protocol, patient-specific orders, and clinician judgment.
       </div>
 
-      <div id="error" class="error"></div>
+      <div id="error" class="error" role="alert" aria-live="polite"></div>
     </div>
 
-    <div class="result-card" id="resultCard" aria-live="polite">
+    <div class="card result-card" id="resultCard" aria-live="polite">
       <p class="result-title">Current Calculation</p>
       <p class="result-value" id="resultValue">No dose calculated yet.</p>
-      <div class="result-meta" id="resultMeta">Select BG, meal size, and protocol mode, then calculate.</div>
-    </div>
-
-    <div class="table-card">
-      <div class="protocol-wrap">
-
-        <section class="protocol" id="protocolSliding">
-          <div class="protocol-head">
-            <div>
-              <p class="protocol-name">Sliding Scale</p>
-              <p class="protocol-sub">Heatmapped correctional dose table</p>
-            </div>
-            <div class="legend">
-              <span><span class="swatch" style="background:var(--green)"></span>Lower</span>
-              <span><span class="swatch" style="background:var(--yellow)"></span>Moderate</span>
-              <span><span class="swatch" style="background:var(--orange)"></span>Elevated</span>
-              <span><span class="swatch" style="background:var(--red)"></span>High</span>
-              <span><span class="swatch" style="background:var(--darkred)"></span>Max</span>
-            </div>
-          </div>
-
-          <table aria-label="Sliding scale dose table">
-            <thead>
-              <tr>
-                <th></th>
-                <th>Small Meal<br>(&lt;40gm)</th>
-                <th>Medium Meal<br>(40–75gm)</th>
-                <th>Large Meal<br>(&gt;75gm)</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="row-label">Blood glucose &lt;150</td>
-                <td class="dose-low">25</td>
-                <td class="dose-med">30</td>
-                <td class="dose-high">35</td>
-              </tr>
-              <tr>
-                <td class="row-label">Blood glucose 150–249</td>
-                <td class="dose-med">30</td>
-                <td class="dose-high">35</td>
-                <td class="dose-veryhigh">40</td>
-              </tr>
-              <tr>
-                <td class="row-label">Blood glucose &gt;250</td>
-                <td class="dose-high">35</td>
-                <td class="dose-veryhigh">40</td>
-                <td class="dose-veryhigh">40</td>
-              </tr>
-            </tbody>
-          </table>
-
-          <div class="footer-note">
-            Edit the values in the <code>PROTOCOLS</code> object to match your site’s approved sliding scale.
-          </div>
-        </section>
-
-        <section class="protocol hidden" id="protocolFixed">
-          <div class="protocol-head">
-            <div>
-              <p class="protocol-name">Fixed Scale</p>
-              <p class="protocol-sub">Heatmapped fixed meal dosing table</p>
-            </div>
-            <div class="legend">
-              <span><span class="swatch" style="background:var(--green)"></span>Lower</span>
-              <span><span class="swatch" style="background:var(--yellow)"></span>Moderate</span>
-              <span><span class="swatch" style="background:var(--orange)"></span>Elevated</span>
-              <span><span class="swatch" style="background:var(--red)"></span>High</span>
-              <span><span class="swatch" style="background:var(--darkred)"></span>Max</span>
-            </div>
-          </div>
-
-          <table aria-label="Fixed scale dose table">
-            <thead>
-              <tr>
-                <th></th>
-                <th>Small Meal<br>(&lt;40gm)</th>
-                <th>Medium Meal<br>(40–75gm)</th>
-                <th>Large Meal<br>(&gt;75gm)</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="row-label">Blood glucose &lt;150</td>
-                <td class="dose-low">25</td>
-                <td class="dose-med">30</td>
-                <td class="dose-high">35</td>
-              </tr>
-              <tr>
-                <td class="row-label">Blood glucose 150–249</td>
-                <td class="dose-med">30</td>
-                <td class="dose-high">35</td>
-                <td class="dose-veryhigh">40</td>
-              </tr>
-              <tr>
-                <td class="row-label">Blood glucose &gt;250</td>
-                <td class="dose-high">35</td>
-                <td class="dose-veryhigh">40</td>
-                <td class="dose-max">45</td>
-              </tr>
-            </tbody>
-          </table>
-
-          <div class="footer-note">
-            Edit the values in the <code>PROTOCOLS</code> object to match your site’s approved fixed scale.
-          </div>
-        </section>
-
+      <div class="result-meta" id="resultMeta">
+        Select BG, meal size, and protocol mode, then calculate.
       </div>
     </div>
+
+    <div class="card table-card">
+      <div class="protocol-head">
+        <div>
+          <p class="protocol-name" id="protocolTitle">Sliding Scale</p>
+          <p class="protocol-sub" id="protocolSubtitle">Heatmapped dose table</p>
+        </div>
+        <div class="legend" aria-label="Heatmap legend">
+          <span><span class="swatch" style="background:var(--green)"></span>Lower</span>
+          <span><span class="swatch" style="background:var(--yellow)"></span>Moderate</span>
+          <span><span class="swatch" style="background:var(--orange)"></span>Elevated</span>
+          <span><span class="swatch" style="background:var(--red)"></span>High</span>
+          <span><span class="swatch" style="background:var(--darkred)"></span>Max</span>
+        </div>
+      </div>
+
+      <div class="export-area" id="exportArea">
+        <div id="displayTableWrap"></div>
+      </div>
+
+      <div class="footer-note">
+        The heatmap color is derived from the dose values in the active protocol and updates automatically when values change.
+      </div>
+    </div>
+
+    <details open class="card editor-card">
+      <summary>Clinician review: edit the active protocol values</summary>
+      <div class="editor-head">
+        <p class="editor-title" id="editorTitle">Edit Sliding Scale</p>
+        <p class="editor-sub">
+          Adjust the dose values in the active protocol, then click Apply. The display table and heatmap will re-render immediately.
+        </p>
+      </div>
+
+      <div id="editorTableWrap"></div>
+
+      <div class="editor-actions">
+        <button type="button" class="apply-btn" id="applyBtn">Apply Changes</button>
+      </div>
+    </details>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -512,10 +502,10 @@
   <script>
     "use strict";
 
-    const PROTOCOLS = {
+    const DEFAULT_PROTOCOLS = {
       sliding: {
         label: "Sliding Scale",
-        targetId: "protocolSliding",
+        subtitle: "Heatmapped dose table",
         matrix: {
           low:    { small: 25, medium: 30, large: 35 },
           medium: { small: 30, medium: 35, large: 40 },
@@ -524,7 +514,7 @@
       },
       fixed: {
         label: "Fixed Scale",
-        targetId: "protocolFixed",
+        subtitle: "Heatmapped dose table",
         matrix: {
           low:    { small: 25, medium: 30, large: 35 },
           medium: { small: 30, medium: 35, large: 40 },
@@ -533,11 +523,19 @@
       }
     };
 
-    const BG_RANGES = {
-      low: "<150",
-      medium: "150–249",
-      high: ">250"
-    };
+    const MEALS = [
+      { key: "small", label: "Small Meal<br>(&lt;40gm)" },
+      { key: "medium", label: "Medium Meal<br>(40–75gm)" },
+      { key: "large", label: "Large Meal<br>(&gt;75gm)" }
+    ];
+
+    const BG_ROWS = [
+      { key: "low", label: "Blood glucose &lt;150" },
+      { key: "medium", label: "Blood glucose 150–249" },
+      { key: "high", label: "Blood glucose &gt;250" }
+    ];
+
+    const PROTOCOLS = JSON.parse(JSON.stringify(DEFAULT_PROTOCOLS));
 
     const bgInput = document.getElementById("bg");
     const mealSelect = document.getElementById("meal");
@@ -550,6 +548,13 @@
     const calcBtn = document.getElementById("calcBtn");
     const exportPngBtn = document.getElementById("exportPngBtn");
     const exportPdfBtn = document.getElementById("exportPdfBtn");
+    const applyBtn = document.getElementById("applyBtn");
+    const protocolTitle = document.getElementById("protocolTitle");
+    const protocolSubtitle = document.getElementById("protocolSubtitle");
+    const editorTitle = document.getElementById("editorTitle");
+    const displayTableWrap = document.getElementById("displayTableWrap");
+    const editorTableWrap = document.getElementById("editorTableWrap");
+    const exportArea = document.getElementById("exportArea");
 
     let activeMode = "sliding";
 
@@ -559,16 +564,25 @@
       return "high";
     }
 
-    function setActiveMode(mode) {
-      activeMode = mode;
+    function getAllDoses(matrix) {
+      return Object.values(matrix).flatMap(row => Object.values(row).map(Number));
+    }
 
-      btnSliding.classList.toggle("active", mode === "sliding");
-      btnFixed.classList.toggle("active", mode === "fixed");
+    function getDoseClass(dose, matrix) {
+      const values = getAllDoses(matrix).filter(Number.isFinite);
+      const min = Math.min(...values);
+      const max = Math.max(...values);
 
-      document.getElementById("protocolSliding").classList.toggle("hidden", mode !== "sliding");
-      document.getElementById("protocolFixed").classList.toggle("hidden", mode !== "fixed");
+      if (!Number.isFinite(dose) || values.length === 0) return "dose-low";
+      if (max === min) return "dose-low";
 
-      hideError();
+      const r = (dose - min) / (max - min);
+
+      if (r <= 0.20) return "dose-low";
+      if (r <= 0.40) return "dose-med";
+      if (r <= 0.60) return "dose-high";
+      if (r <= 0.80) return "dose-veryhigh";
+      return "dose-max";
     }
 
     function showError(message) {
@@ -579,6 +593,136 @@
     function hideError() {
       errorDiv.textContent = "";
       errorDiv.classList.remove("show");
+    }
+
+    function setActiveMode(mode) {
+      activeMode = mode;
+
+      btnSliding.classList.toggle("active", mode === "sliding");
+      btnFixed.classList.toggle("active", mode === "fixed");
+
+      protocolTitle.textContent = PROTOCOLS[mode].label;
+      protocolSubtitle.textContent = PROTOCOLS[mode].subtitle;
+      editorTitle.textContent = `Edit ${PROTOCOLS[mode].label}`;
+
+      renderTables();
+      hideError();
+    }
+
+    function buildDisplayTable(mode) {
+      const matrix = PROTOCOLS[mode].matrix;
+
+      let html = `
+        <table aria-label="${PROTOCOLS[mode].label} dose table">
+          <thead>
+            <tr>
+              <th></th>
+              ${MEALS.map(m => `<th>${m.label}</th>`).join("")}
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      for (const row of BG_ROWS) {
+        html += `<tr><td class="row-label">${row.label}</td>`;
+        for (const meal of MEALS) {
+          const dose = Number(matrix[row.key][meal.key]);
+          const cls = getDoseClass(dose, matrix);
+          html += `<td class="${cls}">${dose}</td>`;
+        }
+        html += `</tr>`;
+      }
+
+      html += `</tbody></table>`;
+      return html;
+    }
+
+    function buildEditorTable(mode) {
+      const matrix = PROTOCOLS[mode].matrix;
+
+      let html = `
+        <table class="editor-table" aria-label="${PROTOCOLS[mode].label} editor table">
+          <thead>
+            <tr>
+              <th></th>
+              ${MEALS.map(m => `<th>${m.label}</th>`).join("")}
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      for (const row of BG_ROWS) {
+        html += `<tr><td class="row-label">${row.label}</td>`;
+        for (const meal of MEALS) {
+          const value = Number(matrix[row.key][meal.key]);
+          html += `
+            <td>
+              <input
+                type="number"
+                min="0"
+                step="1"
+                inputmode="numeric"
+                data-bg="${row.key}"
+                data-meal="${meal.key}"
+                value="${value}"
+                aria-label="${row.label.replace(/<[^>]*>/g, "")}, ${meal.key} meal dose"
+              />
+            </td>
+          `;
+        }
+        html += `</tr>`;
+      }
+
+      html += `</tbody></table>`;
+      return html;
+    }
+
+    function renderTables() {
+      displayTableWrap.innerHTML = buildDisplayTable(activeMode);
+      editorTableWrap.innerHTML = buildEditorTable(activeMode);
+    }
+
+    function readEditorValues() {
+      const inputs = editorTableWrap.querySelectorAll("input[data-bg][data-meal]");
+      const nextMatrix = {
+        low: {},
+        medium: {},
+        high: {}
+      };
+
+      for (const row of BG_ROWS) {
+        for (const meal of MEALS) {
+          const input = editorTableWrap.querySelector(
+            `input[data-bg="${row.key}"][data-meal="${meal.key}"]`
+          );
+
+          if (!input) {
+            throw new Error(`Missing editor input for ${row.key}/${meal.key}`);
+          }
+
+          const value = Number(input.value);
+
+          if (!Number.isFinite(value) || value < 0) {
+            throw new Error("Please enter valid non-negative integer dose values.");
+          }
+
+          nextMatrix[row.key][meal.key] = Math.round(value);
+        }
+      }
+
+      return nextMatrix;
+    }
+
+    function applyEditorValues() {
+      try {
+        const nextMatrix = readEditorValues();
+        PROTOCOLS[activeMode].matrix = nextMatrix;
+        renderTables();
+        calculateDose();
+        hideError();
+      } catch (err) {
+        showError(err.message || "Unable to apply changes.");
+      }
     }
 
     function calculateDose() {
@@ -600,23 +744,23 @@
       const category = getBgCategory(bg);
       const dose = protocol.matrix[category][meal];
 
-      hideError();
+      const mealLabel = mealSelect.options[mealSelect.selectedIndex].text;
+      const bgLabel = category === "low" ? "<150" : category === "medium" ? "150–249" : ">250";
+
       resultValue.textContent = `Recommended Dose: ${dose} units`;
-      resultMeta.textContent = `${protocol.label} | BG ${BG_RANGES[category]} | Meal: ${mealSelect.options[mealSelect.selectedIndex].text}`;
+      resultMeta.textContent = `${protocol.label} | BG ${bgLabel} | ${mealLabel}`;
       resultCard.style.borderLeftColor = activeMode === "sliding" ? "#2563eb" : "#7c3aed";
+      hideError();
     }
 
     async function captureActiveTable() {
-      const activeProtocol = PROTOCOLS[activeMode];
-      const element = document.getElementById(activeProtocol.targetId);
-
-      const canvas = await html2canvas(element, {
+      const canvas = await html2canvas(exportArea, {
         scale: 2,
         backgroundColor: "#ffffff",
         useCORS: true
       });
 
-      return { canvas, label: activeProtocol.label };
+      return { canvas, label: PROTOCOLS[activeMode].label };
     }
 
     function downloadCanvasAsPng(canvas, filename) {
@@ -632,8 +776,8 @@
         const stamp = new Date().toISOString().slice(0, 10);
         downloadCanvasAsPng(canvas, `${label.replace(/\s+/g, "_").toLowerCase()}_${stamp}.png`);
       } catch (err) {
-        showError("PNG export failed. Please try again.");
         console.error(err);
+        showError("PNG export failed. Please try again.");
       }
     }
 
@@ -644,38 +788,25 @@
         const pdf = new jsPDF("p", "pt", "a4");
 
         const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
         const margin = 24;
-
         const imgWidth = pageWidth - margin * 2;
         const imgHeight = canvas.height * imgWidth / canvas.width;
-
         const imgData = canvas.toDataURL("image/png");
 
-        let heightLeft = imgHeight;
-        let position = margin;
-
-        pdf.addImage(imgData, "PNG", margin, position, imgWidth, imgHeight);
-        heightLeft -= (pageHeight - margin * 2);
-
-        while (heightLeft > 0) {
-          pdf.addPage();
-          position = heightLeft - imgHeight + margin;
-          pdf.addImage(imgData, "PNG", margin, position, imgWidth, imgHeight);
-          heightLeft -= (pageHeight - margin * 2);
-        }
+        pdf.addImage(imgData, "PNG", margin, margin, imgWidth, imgHeight);
 
         const stamp = new Date().toISOString().slice(0, 10);
         pdf.save(`${label.replace(/\s+/g, "_").toLowerCase()}_${stamp}.pdf`);
       } catch (err) {
-        showError("PDF export failed. Please try again.");
         console.error(err);
+        showError("PDF export failed. Please try again.");
       }
     }
 
     btnSliding.addEventListener("click", () => setActiveMode("sliding"));
     btnFixed.addEventListener("click", () => setActiveMode("fixed"));
     calcBtn.addEventListener("click", calculateDose);
+    applyBtn.addEventListener("click", applyEditorValues);
     exportPngBtn.addEventListener("click", exportAsPng);
     exportPdfBtn.addEventListener("click", exportAsPdf);
 
@@ -687,8 +818,7 @@
     });
 
     setActiveMode("sliding");
+    renderTables();
   </script>
 </body>
 </html>
-
-<!-- force redeploy -->
