@@ -3,189 +3,555 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Insulin Dose Calculator - Local Use</title>
+  <title>Insulin Dose Calculator</title>
 
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 900px;
-      margin: 40px auto;
-      padding: 20px;
-      background: #f5f5f5;
-      color: #1f2937;
+    :root{
+      --bg: #f4f6f8;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #d1d5db;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --green: #d9f7c9;
+      --yellow: #fff59d;
+      --orange: #ffd166;
+      --red: #ff8a80;
+      --darkred: #8b0000;
+      --shadow: 0 10px 30px rgba(0,0,0,0.08);
+      --radius: 16px;
     }
 
-    .calculator {
-      background: #fff;
-      padding: 28px;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 28px 16px 40px;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .header-card,
+    .controls-card,
+    .table-card,
+    .result-card {
+      background: var(--card);
+      border: 1px solid rgba(0,0,0,0.05);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .header-card {
+      padding: 22px 22px 18px;
+      margin-bottom: 18px;
     }
 
     h1 {
-      margin-top: 0;
+      margin: 0 0 6px;
+      font-size: 2rem;
     }
 
-    .input-group {
-      margin: 18px 0;
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .controls-card {
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
     }
 
     label {
-      display: block;
-      margin-bottom: 6px;
       font-weight: 700;
+      font-size: 0.95rem;
     }
 
     input, select, button {
+      font: inherit;
+      border-radius: 10px;
+    }
+
+    input, select {
+      border: 1px solid var(--border);
+      padding: 11px 12px;
+      background: #fff;
       width: 100%;
-      padding: 10px 12px;
-      font-size: 16px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      box-sizing: border-box;
     }
 
-    button {
+    .mode-toggle {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
       margin-top: 8px;
-      background: #007bff;
-      color: #fff;
+    }
+
+    .mode-btn, .action-btn {
       border: none;
-      padding: 14px;
-      font-size: 18px;
+      padding: 11px 14px;
       cursor: pointer;
+      transition: transform .05s ease, background .2s ease, opacity .2s ease;
     }
 
-    button:hover {
-      background: #0056b3;
+    .mode-btn {
+      background: #e5e7eb;
+      color: #111827;
+      font-weight: 700;
     }
 
-    .result, .error {
+    .mode-btn.active {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .mode-btn:hover, .action-btn:hover {
+      opacity: 0.96;
+    }
+
+    .mode-btn:active, .action-btn:active {
+      transform: translateY(1px);
+    }
+
+    .action-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .action-btn {
+      background: #111827;
+      color: white;
+      font-weight: 700;
+    }
+
+    .action-btn.secondary {
+      background: #374151;
+    }
+
+    .calc-btn {
+      background: var(--primary);
+      color: white;
+      font-weight: 800;
+      width: 100%;
+      padding: 13px 14px;
+      border: none;
+      margin-top: 6px;
+    }
+
+    .calc-btn:hover {
+      background: var(--primary-hover);
+    }
+
+    .note {
+      margin-top: 12px;
+      padding: 12px 13px;
+      background: #fff7ed;
+      border: 1px solid #fdba74;
+      border-radius: 12px;
+      color: #92400e;
+      line-height: 1.45;
+      font-size: 0.95rem;
+    }
+
+    .result-card {
+      margin: 18px 0;
+      padding: 16px 18px;
+      border-left: 8px solid var(--primary);
+    }
+
+    .result-title {
+      margin: 0 0 6px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .result-value {
+      font-size: 1.55rem;
+      font-weight: 800;
+      margin: 0;
+    }
+
+    .result-meta {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .table-card {
+      padding: 18px;
       margin-top: 18px;
-      padding: 14px;
-      border-radius: 6px;
+    }
+
+    .protocol-wrap {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+
+    .protocol {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .protocol.hidden {
       display: none;
     }
 
-    .result {
-      font-size: 22px;
-      text-align: center;
+    .protocol-head {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
     }
 
-    .error {
-      background: #f8d7da;
-      border: 1px solid #dc3545;
-      color: #842029;
+    .protocol-name {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 800;
     }
 
-    .warning {
-      color: #856404;
-      background: #fff3cd;
-      padding: 12px;
-      border-radius: 6px;
-      margin-top: 18px;
+    .protocol-sub {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .legend {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .swatch {
+      width: 18px;
+      height: 18px;
+      border: 1px solid rgba(0,0,0,0.12);
+      border-radius: 4px;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 4px;
     }
 
     table {
       width: 100%;
-      margin-top: 24px;
       border-collapse: collapse;
     }
 
     th, td {
-      padding: 10px;
-      border: 1px solid #ddd;
+      border: 1px solid #cfd4dc;
+      padding: 10px 12px;
       text-align: center;
+      vertical-align: middle;
     }
 
     th {
-      background: #007bff;
-      color: #fff;
+      background: #f3f4f6;
+      font-weight: 800;
     }
 
-    /* Color-coded rows */
-    .bg-low {
-      background-color: #d4edda;
+    td.row-label {
+      text-align: left;
+      font-weight: 700;
+      background: #fafafa;
+      min-width: 220px;
     }
 
-    .bg-medium {
-      background-color: #fff3cd;
+    .dose-low    { background: var(--green); }
+    .dose-med    { background: var(--yellow); }
+    .dose-high   { background: var(--orange); }
+    .dose-veryhigh { background: var(--red); }
+    .dose-max    { background: var(--darkred); color: #fff; }
+
+    .footer-note {
+      margin-top: 12px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.45;
     }
 
-    .bg-high {
-      background-color: #f8d7da;
+    .error {
+      display: none;
+      margin-top: 12px;
+      padding: 11px 12px;
+      background: #fee2e2;
+      border: 1px solid #fca5a5;
+      color: #991b1b;
+      border-radius: 10px;
+      font-weight: 700;
+    }
+
+    .error.show {
+      display: block;
+    }
+
+    @media (max-width: 760px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+      td.row-label {
+        min-width: 160px;
+      }
+      h1 {
+        font-size: 1.65rem;
+      }
+    }
+
+    @media print {
+      body {
+        background: #fff;
+        padding: 0;
+      }
+      .controls-card, .action-row, .note {
+        display: none !important;
+      }
+      .header-card, .table-card, .result-card {
+        box-shadow: none;
+        border: none;
+      }
+      .table-card {
+        margin-top: 0;
+      }
     }
   </style>
 </head>
 
 <body>
-  <div class="calculator">
-    <h1>Insulin Dose Calculator</h1>
-    <p><strong>For Local Clinical Use Only</strong></p>
-
-    <div class="input-group">
-      <label for="bg">Blood Glucose (mg/dL)</label>
-      <input type="number" id="bg" min="50" max="500" value="120" />
+  <div class="page">
+    <div class="header-card">
+      <h1>Insulin Dose Calculator</h1>
+      <p class="subtitle">
+        Local clinical reference tool with selectable protocol mode, color-coded dose table, and export options.
+      </p>
     </div>
 
-    <div class="input-group">
-      <label for="meal">Meal Size</label>
-      <select id="meal">
-        <option value="small">Small Meal (&lt;40gm)</option>
-        <option value="medium">Medium Meal (40–75gm)</option>
-        <option value="large">Large Meal (&gt;75gm)</option>
-      </select>
+    <div class="controls-card">
+      <div class="grid">
+        <div class="field">
+          <label for="bg">Blood Glucose (mg/dL)</label>
+          <input id="bg" type="number" min="50" max="500" step="1" value="120" />
+        </div>
+
+        <div class="field">
+          <label for="meal">Meal Size</label>
+          <select id="meal">
+            <option value="small">Small Meal (&lt;40gm)</option>
+            <option value="medium">Medium Meal (40–75gm)</option>
+            <option value="large">Large Meal (&gt;75gm)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field" style="margin-top:14px;">
+        <label>Protocol Mode</label>
+        <div class="mode-toggle" role="tablist" aria-label="Protocol mode">
+          <button type="button" class="mode-btn active" data-mode="sliding" id="btnSliding">Sliding Scale</button>
+          <button type="button" class="mode-btn" data-mode="fixed" id="btnFixed">Fixed Scale</button>
+        </div>
+      </div>
+
+      <button type="button" class="calc-btn" id="calcBtn">Calculate Dose</button>
+
+      <div class="action-row">
+        <button type="button" class="action-btn" id="exportPngBtn">Download PNG of Active Table</button>
+        <button type="button" class="action-btn secondary" id="exportPdfBtn">Download PDF of Active Table</button>
+      </div>
+
+      <div class="note">
+        ⚠️ Clinical decision support only. Follow institutional protocol, patient-specific orders, and clinician judgment.
+      </div>
+
+      <div id="error" class="error"></div>
     </div>
 
-    <button id="calcBtn">Calculate Insulin Dose</button>
-
-    <div id="result" class="result"></div>
-    <div id="error" class="error"></div>
-
-    <div class="warning">
-      ⚠️ This calculator is a clinical decision support tool. Always use clinical judgment and follow institutional protocols.
+    <div class="result-card" id="resultCard" aria-live="polite">
+      <p class="result-title">Current Calculation</p>
+      <p class="result-value" id="resultValue">No dose calculated yet.</p>
+      <div class="result-meta" id="resultMeta">Select BG, meal size, and protocol mode, then calculate.</div>
     </div>
 
-    <h3>Reference Dosing Table</h3>
-    <table>
-      <tr>
-        <th>Blood Glucose</th>
-        <th>Small (&lt;40g)</th>
-        <th>Medium (40–75g)</th>
-        <th>Large (&gt;75g)</th>
-      </tr>
-      <tr class="bg-low">
-        <td>&lt;150</td>
-        <td>25</td>
-        <td>30</td>
-        <td>35</td>
-      </tr>
-      <tr class="bg-medium">
-        <td>150–249</td>
-        <td>30</td>
-        <td>35</td>
-        <td>40</td>
-      </tr>
-      <tr class="bg-high">
-        <td>≥250</td>
-        <td>35</td>
-        <td>40</td>
-        <td>45</td>
-      </tr>
-    </table>
+    <div class="table-card">
+      <div class="protocol-wrap">
+
+        <section class="protocol" id="protocolSliding">
+          <div class="protocol-head">
+            <div>
+              <p class="protocol-name">Sliding Scale</p>
+              <p class="protocol-sub">Heatmapped correctional dose table</p>
+            </div>
+            <div class="legend">
+              <span><span class="swatch" style="background:var(--green)"></span>Lower</span>
+              <span><span class="swatch" style="background:var(--yellow)"></span>Moderate</span>
+              <span><span class="swatch" style="background:var(--orange)"></span>Elevated</span>
+              <span><span class="swatch" style="background:var(--red)"></span>High</span>
+              <span><span class="swatch" style="background:var(--darkred)"></span>Max</span>
+            </div>
+          </div>
+
+          <table aria-label="Sliding scale dose table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Small Meal<br>(&lt;40gm)</th>
+                <th>Medium Meal<br>(40–75gm)</th>
+                <th>Large Meal<br>(&gt;75gm)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="row-label">Blood glucose &lt;150</td>
+                <td class="dose-low">25</td>
+                <td class="dose-med">30</td>
+                <td class="dose-high">35</td>
+              </tr>
+              <tr>
+                <td class="row-label">Blood glucose 150–249</td>
+                <td class="dose-med">30</td>
+                <td class="dose-high">35</td>
+                <td class="dose-veryhigh">40</td>
+              </tr>
+              <tr>
+                <td class="row-label">Blood glucose &gt;250</td>
+                <td class="dose-high">35</td>
+                <td class="dose-veryhigh">40</td>
+                <td class="dose-veryhigh">40</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="footer-note">
+            Edit the values in the <code>PROTOCOLS</code> object to match your site’s approved sliding scale.
+          </div>
+        </section>
+
+        <section class="protocol hidden" id="protocolFixed">
+          <div class="protocol-head">
+            <div>
+              <p class="protocol-name">Fixed Scale</p>
+              <p class="protocol-sub">Heatmapped fixed meal dosing table</p>
+            </div>
+            <div class="legend">
+              <span><span class="swatch" style="background:var(--green)"></span>Lower</span>
+              <span><span class="swatch" style="background:var(--yellow)"></span>Moderate</span>
+              <span><span class="swatch" style="background:var(--orange)"></span>Elevated</span>
+              <span><span class="swatch" style="background:var(--red)"></span>High</span>
+              <span><span class="swatch" style="background:var(--darkred)"></span>Max</span>
+            </div>
+          </div>
+
+          <table aria-label="Fixed scale dose table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Small Meal<br>(&lt;40gm)</th>
+                <th>Medium Meal<br>(40–75gm)</th>
+                <th>Large Meal<br>(&gt;75gm)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="row-label">Blood glucose &lt;150</td>
+                <td class="dose-low">25</td>
+                <td class="dose-med">30</td>
+                <td class="dose-high">35</td>
+              </tr>
+              <tr>
+                <td class="row-label">Blood glucose 150–249</td>
+                <td class="dose-med">30</td>
+                <td class="dose-high">35</td>
+                <td class="dose-veryhigh">40</td>
+              </tr>
+              <tr>
+                <td class="row-label">Blood glucose &gt;250</td>
+                <td class="dose-high">35</td>
+                <td class="dose-veryhigh">40</td>
+                <td class="dose-max">45</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="footer-note">
+            Edit the values in the <code>PROTOCOLS</code> object to match your site’s approved fixed scale.
+          </div>
+        </section>
+
+      </div>
+    </div>
   </div>
 
-  <script>
-    const dosingMatrix = Object.freeze({
-      low:    { small: 25, medium: 30, large: 35 },
-      medium: { small: 30, medium: 35, large: 40 },
-      high:   { small: 35, medium: 40, large: 45 }
-    });
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-    const bgStyles = {
-      low:    { bg: "#d4edda", border: "#28a745", label: "<150" },
-      medium: { bg: "#fff3cd", border: "#ffc107", label: "150–249" },
-      high:   { bg: "#f8d7da", border: "#dc3545", label: "≥250" }
+  <script>
+    "use strict";
+
+    const PROTOCOLS = {
+      sliding: {
+        label: "Sliding Scale",
+        targetId: "protocolSliding",
+        matrix: {
+          low:    { small: 25, medium: 30, large: 35 },
+          medium: { small: 30, medium: 35, large: 40 },
+          high:   { small: 35, medium: 40, large: 40 }
+        }
+      },
+      fixed: {
+        label: "Fixed Scale",
+        targetId: "protocolFixed",
+        matrix: {
+          low:    { small: 25, medium: 30, large: 35 },
+          medium: { small: 30, medium: 35, large: 40 },
+          high:   { small: 35, medium: 40, large: 45 }
+        }
+      }
     };
+
+    const BG_RANGES = {
+      low: "<150",
+      medium: "150–249",
+      high: ">250"
+    };
+
+    const bgInput = document.getElementById("bg");
+    const mealSelect = document.getElementById("meal");
+    const resultCard = document.getElementById("resultCard");
+    const resultValue = document.getElementById("resultValue");
+    const resultMeta = document.getElementById("resultMeta");
+    const errorDiv = document.getElementById("error");
+    const btnSliding = document.getElementById("btnSliding");
+    const btnFixed = document.getElementById("btnFixed");
+    const calcBtn = document.getElementById("calcBtn");
+    const exportPngBtn = document.getElementById("exportPngBtn");
+    const exportPdfBtn = document.getElementById("exportPdfBtn");
+
+    let activeMode = "sliding";
 
     function getBgCategory(bg) {
       if (bg < 150) return "low";
@@ -193,56 +559,134 @@
       return "high";
     }
 
-    function showResult(dose, category) {
-      const resultDiv = document.getElementById("result");
-      const style = bgStyles[category];
+    function setActiveMode(mode) {
+      activeMode = mode;
 
-      resultDiv.innerHTML = `
-        <div>
-          <div style="font-size:14px; margin-bottom:6px;">
-            BG Category: ${style.label}
-          </div>
-          <strong>Recommended Dose: ${dose} units</strong>
-        </div>
-      `;
+      btnSliding.classList.toggle("active", mode === "sliding");
+      btnFixed.classList.toggle("active", mode === "fixed");
 
-      resultDiv.style.background = style.bg;
-      resultDiv.style.border = `2px solid ${style.border}`;
-      resultDiv.style.display = "block";
+      document.getElementById("protocolSliding").classList.toggle("hidden", mode !== "sliding");
+      document.getElementById("protocolFixed").classList.toggle("hidden", mode !== "fixed");
+
+      hideError();
     }
 
     function showError(message) {
-      const errorDiv = document.getElementById("error");
       errorDiv.textContent = message;
-      errorDiv.style.display = "block";
-      document.getElementById("result").style.display = "none";
+      errorDiv.classList.add("show");
+    }
+
+    function hideError() {
+      errorDiv.textContent = "";
+      errorDiv.classList.remove("show");
     }
 
     function calculateDose() {
-      const bg = Number(document.getElementById("bg").value);
-      const meal = document.getElementById("meal").value;
+      const bgRaw = bgInput.value.trim();
+      const bg = Number(bgRaw);
+      const meal = mealSelect.value;
+      const protocol = PROTOCOLS[activeMode];
 
-      if (!Number.isFinite(bg) || bg < 50 || bg > 500) {
-        showError("Enter BG between 50–500 mg/dL");
+      if (bgRaw === "" || !Number.isFinite(bg)) {
+        showError("Please enter a valid blood glucose value.");
         return;
       }
 
-      document.getElementById("error").style.display = "none";
+      if (bg < 50 || bg > 500) {
+        showError("Please enter a blood glucose value between 50 and 500 mg/dL.");
+        return;
+      }
 
       const category = getBgCategory(bg);
-      const dose = dosingMatrix[category][meal];
+      const dose = protocol.matrix[category][meal];
 
-      showResult(dose, category);
+      hideError();
+      resultValue.textContent = `Recommended Dose: ${dose} units`;
+      resultMeta.textContent = `${protocol.label} | BG ${BG_RANGES[category]} | Meal: ${mealSelect.options[mealSelect.selectedIndex].text}`;
+      resultCard.style.borderLeftColor = activeMode === "sliding" ? "#2563eb" : "#7c3aed";
     }
 
-    document.getElementById("calcBtn").addEventListener("click", calculateDose);
+    async function captureActiveTable() {
+      const activeProtocol = PROTOCOLS[activeMode];
+      const element = document.getElementById(activeProtocol.targetId);
 
-    document.getElementById("bg").addEventListener("keydown", (e) => {
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        backgroundColor: "#ffffff",
+        useCORS: true
+      });
+
+      return { canvas, label: activeProtocol.label };
+    }
+
+    function downloadCanvasAsPng(canvas, filename) {
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/png");
+      link.download = filename;
+      link.click();
+    }
+
+    async function exportAsPng() {
+      try {
+        const { canvas, label } = await captureActiveTable();
+        const stamp = new Date().toISOString().slice(0, 10);
+        downloadCanvasAsPng(canvas, `${label.replace(/\s+/g, "_").toLowerCase()}_${stamp}.png`);
+      } catch (err) {
+        showError("PNG export failed. Please try again.");
+        console.error(err);
+      }
+    }
+
+    async function exportAsPdf() {
+      try {
+        const { canvas, label } = await captureActiveTable();
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF("p", "pt", "a4");
+
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const margin = 24;
+
+        const imgWidth = pageWidth - margin * 2;
+        const imgHeight = canvas.height * imgWidth / canvas.width;
+
+        const imgData = canvas.toDataURL("image/png");
+
+        let heightLeft = imgHeight;
+        let position = margin;
+
+        pdf.addImage(imgData, "PNG", margin, position, imgWidth, imgHeight);
+        heightLeft -= (pageHeight - margin * 2);
+
+        while (heightLeft > 0) {
+          pdf.addPage();
+          position = heightLeft - imgHeight + margin;
+          pdf.addImage(imgData, "PNG", margin, position, imgWidth, imgHeight);
+          heightLeft -= (pageHeight - margin * 2);
+        }
+
+        const stamp = new Date().toISOString().slice(0, 10);
+        pdf.save(`${label.replace(/\s+/g, "_").toLowerCase()}_${stamp}.pdf`);
+      } catch (err) {
+        showError("PDF export failed. Please try again.");
+        console.error(err);
+      }
+    }
+
+    btnSliding.addEventListener("click", () => setActiveMode("sliding"));
+    btnFixed.addEventListener("click", () => setActiveMode("fixed"));
+    calcBtn.addEventListener("click", calculateDose);
+    exportPngBtn.addEventListener("click", exportAsPng);
+    exportPdfBtn.addEventListener("click", exportAsPdf);
+
+    bgInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         e.preventDefault();
         calculateDose();
       }
     });
+
+    setActiveMode("sliding");
   </script>
 </body>
 </html>
