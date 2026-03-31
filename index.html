@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Insulin Dose Calculator</title>
-
+  <title>Insulin Dose Toolkit</title>
   <style>
     :root {
       --bg: #f4f6f8;
@@ -14,6 +13,13 @@
       --border: #d1d5db;
       --primary: #2563eb;
       --primary-hover: #1d4ed8;
+      --secondary: #374151;
+      --secondary-hover: #111827;
+      --success: #059669;
+      --success-hover: #047857;
+      --warning-bg: #fff7ed;
+      --warning-border: #fdba74;
+      --warning-text: #92400e;
       --green: #d9f7c9;
       --yellow: #fff59d;
       --orange: #ffd166;
@@ -34,7 +40,7 @@
     }
 
     .page {
-      max-width: 1120px;
+      max-width: 1180px;
       margin: 0 auto;
     }
 
@@ -46,7 +52,7 @@
     }
 
     .header-card {
-      padding: 22px 22px 18px;
+      padding: 22px;
       margin-bottom: 18px;
     }
 
@@ -61,7 +67,11 @@
       line-height: 1.45;
     }
 
-    .controls-card {
+    .controls-card,
+    .result-card,
+    .table-card,
+    .editor-card,
+    .source-card {
       padding: 18px;
       margin-bottom: 18px;
     }
@@ -69,6 +79,12 @@
     .grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 14px;
     }
 
@@ -106,7 +122,7 @@
       margin-top: 8px;
     }
 
-    .mode-btn, .action-btn, .calc-btn, .apply-btn {
+    .mode-btn, .action-btn, .calc-btn, .apply-btn, .ghost-btn {
       border: none;
       padding: 11px 14px;
       cursor: pointer;
@@ -124,15 +140,15 @@
       color: #fff;
     }
 
-    .mode-btn:hover, .action-btn:hover, .calc-btn:hover, .apply-btn:hover {
+    .mode-btn:hover, .action-btn:hover, .calc-btn:hover, .apply-btn:hover, .ghost-btn:hover {
       opacity: 0.96;
     }
 
-    .mode-btn:active, .action-btn:active, .calc-btn:active, .apply-btn:active {
+    .mode-btn:active, .action-btn:active, .calc-btn:active, .apply-btn:active, .ghost-btn:active {
       transform: translateY(1px);
     }
 
-    .action-row {
+    .row {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
@@ -140,12 +156,16 @@
     }
 
     .action-btn {
-      background: #111827;
+      background: var(--secondary);
       color: white;
     }
 
     .action-btn.secondary {
-      background: #374151;
+      background: var(--secondary-hover);
+    }
+
+    .action-btn.light {
+      background: #6b7280;
     }
 
     .calc-btn {
@@ -160,20 +180,24 @@
       background: var(--primary-hover);
     }
 
+    .ghost-btn {
+      background: #eef2ff;
+      color: #1f2937;
+      border: 1px solid #c7d2fe;
+    }
+
     .note {
       margin-top: 12px;
       padding: 12px 13px;
-      background: #fff7ed;
-      border: 1px solid #fdba74;
+      background: var(--warning-bg);
+      border: 1px solid var(--warning-border);
       border-radius: 12px;
-      color: #92400e;
+      color: var(--warning-text);
       line-height: 1.45;
       font-size: 0.95rem;
     }
 
     .result-card {
-      margin: 18px 0;
-      padding: 16px 18px;
       border-left: 8px solid var(--primary);
     }
 
@@ -184,45 +208,65 @@
     }
 
     .result-value {
-      font-size: 1.55rem;
+      font-size: 1.5rem;
       font-weight: 800;
       margin: 0;
     }
 
     .result-meta {
-      margin-top: 6px;
+      margin-top: 8px;
       color: var(--muted);
       font-size: 0.95rem;
-      line-height: 1.4;
+      line-height: 1.45;
     }
 
-    .table-card {
-      padding: 18px;
-      margin-top: 18px;
+    .result-advanced {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
     }
 
-    .protocol-head {
-      padding: 14px 16px;
-      border: 1px solid var(--border);
-      border-radius: 14px 14px 0 0;
+    .pill {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+
+    .pill .k {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+    }
+
+    .pill .v {
+      font-weight: 800;
+      font-size: 1rem;
+    }
+
+    .table-header,
+    .editor-header,
+    .source-header {
       display: flex;
       justify-content: space-between;
-      gap: 12px;
       align-items: center;
+      gap: 12px;
       flex-wrap: wrap;
-      background: #fff;
+      margin-bottom: 12px;
     }
 
-    .protocol-name {
+    .section-title {
       margin: 0;
       font-size: 1.1rem;
       font-weight: 800;
     }
 
-    .protocol-sub {
-      margin: 0;
+    .section-subtitle {
+      margin: 4px 0 0;
       color: var(--muted);
       font-size: 0.92rem;
+      line-height: 1.45;
     }
 
     .legend {
@@ -246,8 +290,7 @@
 
     .export-area {
       border: 1px solid var(--border);
-      border-top: none;
-      border-radius: 0 0 14px 14px;
+      border-radius: 14px;
       overflow: hidden;
       background: #fff;
     }
@@ -276,70 +319,17 @@
       min-width: 220px;
     }
 
-    .dose-low     { background: var(--green); }
-    .dose-med     { background: var(--yellow); }
-    .dose-high    { background: var(--orange); }
+    .dose-low      { background: var(--green); }
+    .dose-med      { background: var(--yellow); }
+    .dose-high     { background: var(--orange); }
     .dose-veryhigh { background: var(--red); }
-    .dose-max     { background: var(--darkred); color: #fff; }
+    .dose-max      { background: var(--darkred); color: #fff; }
 
     .footer-note {
       margin-top: 12px;
       font-size: 0.9rem;
       color: var(--muted);
       line-height: 1.45;
-    }
-
-    .editor-card {
-      margin-top: 18px;
-      padding: 18px;
-    }
-
-    .editor-head {
-      margin-bottom: 12px;
-    }
-
-    .editor-title {
-      margin: 0 0 5px;
-      font-size: 1.05rem;
-      font-weight: 800;
-    }
-
-    .editor-sub {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.93rem;
-      line-height: 1.45;
-    }
-
-    .editor-table input {
-      width: 100%;
-      min-width: 72px;
-      text-align: center;
-      border: 1px solid var(--border);
-      padding: 10px 8px;
-      border-radius: 8px;
-      background: #fff;
-    }
-
-    .editor-actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 14px;
-    }
-
-    .apply-btn {
-      background: #059669;
-      color: #fff;
-    }
-
-    .apply-btn:hover {
-      background: #047857;
-    }
-
-    .small-btn {
-      background: #6b7280;
-      color: #fff;
     }
 
     .error {
@@ -367,8 +357,113 @@
       padding: 10px 0;
     }
 
+    .editor-table input {
+      width: 100%;
+      min-width: 72px;
+      text-align: center;
+      border: 1px solid var(--border);
+      padding: 10px 8px;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(17, 24, 39, 0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 50;
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal {
+      width: min(920px, 100%);
+      max-height: 90vh;
+      overflow: auto;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.2);
+      border: 1px solid #e5e7eb;
+      padding: 20px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .modal-title {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 800;
+    }
+
+    .close-btn {
+      border: none;
+      background: #e5e7eb;
+      color: #111827;
+      border-radius: 999px;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .source-list {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--text);
+      line-height: 1.55;
+    }
+
+    .source-list li + li {
+      margin-top: 8px;
+    }
+
+    .source-list a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .source-list a:hover {
+      text-decoration: underline;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 920px) {
+      .result-advanced {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
     @media (max-width: 760px) {
-      .grid {
+      .grid,
+      .grid-3,
+      .settings-grid,
+      .result-advanced {
         grid-template-columns: 1fr;
       }
       td.row-label {
@@ -384,7 +479,7 @@
         background: #fff;
         padding: 0;
       }
-      .controls-card, .editor-card, .action-row, .note, details {
+      .controls-card, .editor-card, .note, details, .source-card, .settings-button, .modal-backdrop {
         display: none !important;
       }
       .card {
@@ -393,18 +488,16 @@
       }
       .table-card {
         margin-top: 0;
-        padding-top: 0;
       }
     }
   </style>
 </head>
-
 <body>
   <div class="page">
     <div class="card header-card">
-      <h1>Insulin Dose Calculator</h1>
+      <h1>Insulin Dose Toolkit</h1>
       <p class="subtitle">
-        Meal-bin dosing with selectable protocol mode, editable values for clinician review, and exportable heatmapped tables.
+        Meal-bin dosing with editable protocol matrices, TDD-derived support calculations, clinician settings, and exportable heatmapped tables.
       </p>
     </div>
 
@@ -433,15 +526,18 @@
         </div>
       </div>
 
-      <button type="button" class="calc-btn" id="calcBtn">Calculate Dose</button>
+      <button type="button" class="calc-btn" id="calcBtn">Calculate</button>
 
-      <div class="action-row">
-        <button type="button" class="action-btn" id="exportPngBtn">Download PNG of Active Table</button>
-        <button type="button" class="action-btn secondary" id="exportPdfBtn">Download PDF of Active Table</button>
+      <div class="row">
+        <button type="button" class="action-btn" id="exportActivePngBtn">Download Active PNG</button>
+        <button type="button" class="action-btn secondary" id="exportActivePdfBtn">Download Active PDF</button>
+        <button type="button" class="action-btn" id="exportSlidingPngBtn">Sliding PNG</button>
+        <button type="button" class="action-btn secondary" id="exportFixedPdfBtn">Fixed PDF</button>
+        <button type="button" class="ghost-btn settings-button" id="settingsBtn">Settings</button>
       </div>
 
       <div class="note">
-        ⚠️ Clinical decision support only. Follow institutional protocol, patient-specific orders, and clinician judgment.
+        Clinical decision support only. Final dosing should follow local protocol, patient-specific orders, and clinician judgment.
       </div>
 
       <div id="error" class="error" role="alert" aria-live="polite"></div>
@@ -453,13 +549,42 @@
       <div class="result-meta" id="resultMeta">
         Select BG, meal size, and protocol mode, then calculate.
       </div>
+
+      <div class="result-advanced">
+        <div class="pill"><div class="k">TDD</div><div class="v" id="tddValue">—</div></div>
+        <div class="pill"><div class="k">Basal</div><div class="v" id="basalValue">—</div></div>
+        <div class="pill"><div class="k">Bolus</div><div class="v" id="bolusValue">—</div></div>
+        <div class="pill"><div class="k">Target BG</div><div class="v" id="targetBgValue">—</div></div>
+      </div>
+
+      <details style="margin-top:14px;">
+        <summary>Suggested dose method</summary>
+        <div class="grid" style="margin-top:10px;">
+          <div class="field">
+            <label for="doseMethod">Suggestion source</label>
+            <select id="doseMethod">
+              <option value="matrix">Protocol matrix</option>
+              <option value="tdb">TDD / ICR / ISF calculation</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="carbEstimate">Meal carb estimate (grams)</label>
+            <select id="carbEstimate">
+              <option value="30">Small bin ≈ 30 g</option>
+              <option value="60" selected>Medium bin ≈ 60 g</option>
+              <option value="90">Large bin ≈ 90 g</option>
+            </select>
+          </div>
+        </div>
+        <div class="result-meta" id="suggestedDoseText" style="margin-top:10px;">Suggested dose will appear here after calculation.</div>
+      </details>
     </div>
 
     <div class="card table-card">
-      <div class="protocol-head">
+      <div class="table-header">
         <div>
-          <p class="protocol-name" id="protocolTitle">Sliding Scale</p>
-          <p class="protocol-sub" id="protocolSubtitle">Heatmapped dose table</p>
+          <p class="section-title" id="protocolTitle">Sliding Scale</p>
+          <p class="section-subtitle" id="protocolSubtitle">Heatmapped dose table</p>
         </div>
         <div class="legend" aria-label="Heatmap legend">
           <span><span class="swatch" style="background:var(--green)"></span>Lower</span>
@@ -475,25 +600,130 @@
       </div>
 
       <div class="footer-note">
-        The heatmap color is derived from the dose values in the active protocol and updates automatically when values change.
+        Heatmap colors are derived from the editable dose values and update automatically when values change.
       </div>
     </div>
 
     <details open class="card editor-card">
       <summary>Clinician review: edit the active protocol values</summary>
-      <div class="editor-head">
-        <p class="editor-title" id="editorTitle">Edit Sliding Scale</p>
-        <p class="editor-sub">
-          Adjust the dose values in the active protocol, then click Apply. The display table and heatmap will re-render immediately.
-        </p>
+      <div class="editor-header" style="margin-top:12px;">
+        <div>
+          <p class="section-title" id="editorTitle">Edit Sliding Scale</p>
+          <p class="section-subtitle">
+            Change the active protocol values, then apply. The display table, heatmap, and exported files will reflect the updated matrix.
+          </p>
+        </div>
       </div>
-
       <div id="editorTableWrap"></div>
-
-      <div class="editor-actions">
+      <div class="row" style="margin-top:14px;">
         <button type="button" class="apply-btn" id="applyBtn">Apply Changes</button>
+        <button type="button" class="ghost-btn" id="resetBtn">Reset Active Protocol</button>
       </div>
     </details>
+
+    <div class="card source-card">
+      <div class="source-header">
+        <div>
+          <p class="section-title">Evidence base</p>
+          <p class="section-subtitle">
+            Built around ADA guidance for individualized goals and hospitalized glycemic targets, plus Endotext and ADA pump references for TDD, basal-bolus split, and the 500/1800 rules.
+          </p>
+        </div>
+      </div>
+      <ul class="source-list">
+        <li>
+          ADA Standards of Care emphasize individualized, person-centered management and shared decision-making.
+          <a href="https://diabetesjournals.org/care/article/46/Supplement_1/s49/148058/4-Comprehensive-Medical-Evaluation-and-Assessment" target="_blank" rel="noreferrer">Source</a>
+        </li>
+        <li>
+          ADA 2026 hospital guidance recommends initiating or intensifying therapy for persistent hyperglycemia at ≥180 mg/dL and targeting 140–180 mg/dL for most ICU patients, with 100–180 mg/dL recommended for most non-ICU patients when achievable without significant hypoglycemia.
+          <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12690180/" target="_blank" rel="noreferrer">Source</a>
+        </li>
+        <li>
+          Endotext supports TDD estimation, ~50/50 basal-bolus splitting, and the 500 rule (ICR) and 1800 rule (ISF) derived from TDD.
+          <a href="https://www.ncbi.nlm.nih.gov/books/NBK278938/" target="_blank" rel="noreferrer">Source</a>
+        </li>
+        <li>
+          ADA pump chapter highlights clinician adjustment of target glucose, basal rate, insulin-to-carbohydrate ratio, correction factor, and duration of insulin action.
+          <a href="https://diabetesjournals.org/books/book/42/chapter/4901694/Pump-Therapy-Management-Keeping-Patients-On-The" target="_blank" rel="noreferrer">Source</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="settingsModal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title" id="settingsTitle">Toolkit settings</h2>
+          <p class="section-subtitle">These values drive the TDD, basal/bolus split, correction math, and summary display. Defaults are editable and persisted locally.</p>
+        </div>
+        <button class="close-btn" type="button" id="closeSettingsBtn" aria-label="Close settings">×</button>
+      </div>
+
+      <div class="settings-grid">
+        <div class="field">
+          <label for="weightKg">Weight (kg)</label>
+          <input type="number" id="weightKg" min="0" step="0.1" value="80" />
+        </div>
+
+        <div class="field">
+          <label for="unitsPerKg">Units/kg/day starting point</label>
+          <select id="unitsPerKg">
+            <option value="0.2">0.2</option>
+            <option value="0.3">0.3</option>
+            <option value="0.4" selected>0.4</option>
+            <option value="0.5">0.5</option>
+            <option value="0.6">0.6</option>
+            <option value="0.8">0.8</option>
+            <option value="1.0">1.0</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="basalSplit">Basal share (%)</label>
+          <select id="basalSplit">
+            <option value="40">40%</option>
+            <option value="45">45%</option>
+            <option value="50" selected>50%</option>
+            <option value="55">55%</option>
+            <option value="60">60%</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="targetPreset">Target blood glucose preset</label>
+          <select id="targetPreset">
+            <option value="100">Outpatient-style 100 mg/dL</option>
+            <option value="120" selected>Standard 120 mg/dL</option>
+            <option value="140">Inpatient-style 140 mg/dL</option>
+            <option value="custom">Custom</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="targetBg">Target blood glucose (mg/dL)</label>
+          <input type="number" id="targetBg" min="70" max="200" step="1" value="120" />
+        </div>
+
+        <div class="field">
+          <label for="roundingMode">Rounding mode</label>
+          <select id="roundingMode">
+            <option value="0.5" selected>Nearest 0.5 unit</option>
+            <option value="1">Nearest whole unit</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="note" style="margin-top:16px;">
+        The target BG is used for correction math. If BG is below target, correction is suppressed at zero rather than producing a negative bolus.
+      </div>
+
+      <div class="row" style="margin-top:16px;">
+        <button type="button" class="apply-btn" id="saveSettingsBtn">Save settings</button>
+        <button type="button" class="ghost-btn" id="restoreSettingsBtn">Restore defaults</button>
+      </div>
+    </div>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -501,6 +731,8 @@
 
   <script>
     "use strict";
+
+    const STORAGE_KEY = "insulin-toolkit-state-v1";
 
     const DEFAULT_PROTOCOLS = {
       sliding: {
@@ -523,19 +755,28 @@
       }
     };
 
-    const MEALS = [
-      { key: "small", label: "Small Meal<br>(&lt;40gm)" },
-      { key: "medium", label: "Medium Meal<br>(40–75gm)" },
-      { key: "large", label: "Large Meal<br>(&gt;75gm)" }
-    ];
+    const DEFAULT_SETTINGS = {
+      weightKg: 80,
+      unitsPerKg: 0.4,
+      basalSplit: 50,
+      targetBg: 120,
+      roundingMode: 0.5
+    };
 
     const BG_ROWS = [
-      { key: "low", label: "Blood glucose &lt;150" },
+      { key: "low", label: "Blood glucose <150" },
       { key: "medium", label: "Blood glucose 150–249" },
-      { key: "high", label: "Blood glucose &gt;250" }
+      { key: "high", label: "Blood glucose >250" }
     ];
 
-    const PROTOCOLS = JSON.parse(JSON.stringify(DEFAULT_PROTOCOLS));
+    const MEALS = [
+      { key: "small", label: "Small Meal<br>(&lt;40gm)", grams: 30 },
+      { key: "medium", label: "Medium Meal<br>(40–75gm)", grams: 60 },
+      { key: "large", label: "Large Meal<br>(&gt;75gm)", grams: 90 }
+    ];
+
+    const state = loadState();
+    let activeMode = state.activeMode || "sliding";
 
     const bgInput = document.getElementById("bg");
     const mealSelect = document.getElementById("meal");
@@ -546,8 +787,12 @@
     const btnSliding = document.getElementById("btnSliding");
     const btnFixed = document.getElementById("btnFixed");
     const calcBtn = document.getElementById("calcBtn");
-    const exportPngBtn = document.getElementById("exportPngBtn");
-    const exportPdfBtn = document.getElementById("exportPdfBtn");
+    const exportActivePngBtn = document.getElementById("exportActivePngBtn");
+    const exportActivePdfBtn = document.getElementById("exportActivePdfBtn");
+    const exportSlidingPngBtn = document.getElementById("exportSlidingPngBtn");
+    const exportFixedPdfBtn = document.getElementById("exportFixedPdfBtn");
+    const settingsBtn = document.getElementById("settingsBtn");
+    const resetBtn = document.getElementById("resetBtn");
     const applyBtn = document.getElementById("applyBtn");
     const protocolTitle = document.getElementById("protocolTitle");
     const protocolSubtitle = document.getElementById("protocolSubtitle");
@@ -555,8 +800,76 @@
     const displayTableWrap = document.getElementById("displayTableWrap");
     const editorTableWrap = document.getElementById("editorTableWrap");
     const exportArea = document.getElementById("exportArea");
+    const settingsModal = document.getElementById("settingsModal");
+    const closeSettingsBtn = document.getElementById("closeSettingsBtn");
+    const saveSettingsBtn = document.getElementById("saveSettingsBtn");
+    const restoreSettingsBtn = document.getElementById("restoreSettingsBtn");
+    const weightKgInput = document.getElementById("weightKg");
+    const unitsPerKgInput = document.getElementById("unitsPerKg");
+    const basalSplitInput = document.getElementById("basalSplit");
+    const targetPresetInput = document.getElementById("targetPreset");
+    const targetBgInput = document.getElementById("targetBg");
+    const roundingModeInput = document.getElementById("roundingMode");
+    const doseMethod = document.getElementById("doseMethod");
+    const carbEstimate = document.getElementById("carbEstimate");
+    const suggestedDoseText = document.getElementById("suggestedDoseText");
+    const tddValue = document.getElementById("tddValue");
+    const basalValue = document.getElementById("basalValue");
+    const bolusValue = document.getElementById("bolusValue");
+    const targetBgValue = document.getElementById("targetBgValue");
 
-    let activeMode = "sliding";
+    let protocols = deepClone(DEFAULT_PROTOCOLS);
+    let settings = deepClone(DEFAULT_SETTINGS);
+
+    syncSettingsForm();
+    renderAll();
+    setActiveMode(activeMode);
+    calculateDose();
+
+    function deepClone(obj) {
+      return JSON.parse(JSON.stringify(obj));
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          return { protocols: deepClone(DEFAULT_PROTOCOLS), settings: deepClone(DEFAULT_SETTINGS), activeMode: "sliding" };
+        }
+        const parsed = JSON.parse(raw);
+        return {
+          protocols: parsed.protocols || deepClone(DEFAULT_PROTOCOLS),
+          settings: { ...deepClone(DEFAULT_SETTINGS), ...(parsed.settings || {}) },
+          activeMode: parsed.activeMode || "sliding"
+        };
+      } catch {
+        return { protocols: deepClone(DEFAULT_PROTOCOLS), settings: deepClone(DEFAULT_SETTINGS), activeMode: "sliding" };
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        protocols,
+        settings,
+        activeMode
+      }));
+    }
+
+    function syncSettingsForm() {
+      weightKgInput.value = settings.weightKg;
+      unitsPerKgInput.value = String(settings.unitsPerKg);
+      basalSplitInput.value = String(settings.basalSplit);
+      targetBgInput.value = String(settings.targetBg);
+      roundingModeInput.value = String(settings.roundingMode);
+      targetPresetInput.value = presetFromTarget(settings.targetBg);
+    }
+
+    function presetFromTarget(targetBg) {
+      if (targetBg === 100) return "100";
+      if (targetBg === 120) return "120";
+      if (targetBg === 140) return "140";
+      return "custom";
+    }
 
     function getBgCategory(bg) {
       if (bg < 150) return "low";
@@ -572,17 +885,23 @@
       const values = getAllDoses(matrix).filter(Number.isFinite);
       const min = Math.min(...values);
       const max = Math.max(...values);
-
       if (!Number.isFinite(dose) || values.length === 0) return "dose-low";
       if (max === min) return "dose-low";
-
       const r = (dose - min) / (max - min);
-
       if (r <= 0.20) return "dose-low";
       if (r <= 0.40) return "dose-med";
       if (r <= 0.60) return "dose-high";
       if (r <= 0.80) return "dose-veryhigh";
       return "dose-max";
+    }
+
+    function roundToIncrement(value, increment) {
+      return Math.round(value / increment) * increment;
+    }
+
+    function fmt(value, digits = 1) {
+      if (!Number.isFinite(value)) return "—";
+      return value.toFixed(digits).replace(/\.0$/, "");
     }
 
     function showError(message) {
@@ -597,23 +916,21 @@
 
     function setActiveMode(mode) {
       activeMode = mode;
-
       btnSliding.classList.toggle("active", mode === "sliding");
       btnFixed.classList.toggle("active", mode === "fixed");
-
-      protocolTitle.textContent = PROTOCOLS[mode].label;
-      protocolSubtitle.textContent = PROTOCOLS[mode].subtitle;
-      editorTitle.textContent = `Edit ${PROTOCOLS[mode].label}`;
-
-      renderTables();
+      protocolTitle.textContent = protocols[mode].label;
+      protocolSubtitle.textContent = protocols[mode].subtitle;
+      editorTitle.textContent = `Edit ${protocols[mode].label}`;
+      renderAll();
+      saveState();
       hideError();
+      calculateDose();
     }
 
     function buildDisplayTable(mode) {
-      const matrix = PROTOCOLS[mode].matrix;
-
+      const matrix = protocols[mode].matrix;
       let html = `
-        <table aria-label="${PROTOCOLS[mode].label} dose table">
+        <table aria-label="${protocols[mode].label} dose table">
           <thead>
             <tr>
               <th></th>
@@ -638,10 +955,9 @@
     }
 
     function buildEditorTable(mode) {
-      const matrix = PROTOCOLS[mode].matrix;
-
+      const matrix = protocols[mode].matrix;
       let html = `
-        <table class="editor-table" aria-label="${PROTOCOLS[mode].label} editor table">
+        <table class="editor-table" aria-label="${protocols[mode].label} editor table">
           <thead>
             <tr>
               <th></th>
@@ -665,7 +981,7 @@
                 data-bg="${row.key}"
                 data-meal="${meal.key}"
                 value="${value}"
-                aria-label="${row.label.replace(/<[^>]*>/g, "")}, ${meal.key} meal dose"
+                aria-label="${row.label}, ${meal.key} meal dose"
               />
             </td>
           `;
@@ -677,47 +993,32 @@
       return html;
     }
 
-    function renderTables() {
+    function renderAll() {
       displayTableWrap.innerHTML = buildDisplayTable(activeMode);
       editorTableWrap.innerHTML = buildEditorTable(activeMode);
     }
 
     function readEditorValues() {
-      const inputs = editorTableWrap.querySelectorAll("input[data-bg][data-meal]");
-      const nextMatrix = {
-        low: {},
-        medium: {},
-        high: {}
-      };
-
+      const nextMatrix = { low: {}, medium: {}, high: {} };
       for (const row of BG_ROWS) {
         for (const meal of MEALS) {
-          const input = editorTableWrap.querySelector(
-            `input[data-bg="${row.key}"][data-meal="${meal.key}"]`
-          );
-
-          if (!input) {
-            throw new Error(`Missing editor input for ${row.key}/${meal.key}`);
-          }
-
+          const input = editorTableWrap.querySelector(`input[data-bg="${row.key}"][data-meal="${meal.key}"]`);
+          if (!input) throw new Error(`Missing editor input for ${row.key}/${meal.key}`);
           const value = Number(input.value);
-
           if (!Number.isFinite(value) || value < 0) {
-            throw new Error("Please enter valid non-negative integer dose values.");
+            throw new Error("Enter valid non-negative dose values.");
           }
-
           nextMatrix[row.key][meal.key] = Math.round(value);
         }
       }
-
       return nextMatrix;
     }
 
     function applyEditorValues() {
       try {
-        const nextMatrix = readEditorValues();
-        PROTOCOLS[activeMode].matrix = nextMatrix;
-        renderTables();
+        protocols[activeMode].matrix = readEditorValues();
+        renderAll();
+        saveState();
         calculateDose();
         hideError();
       } catch (err) {
@@ -725,42 +1026,139 @@
       }
     }
 
+    function resetActiveProtocol() {
+      protocols[activeMode] = deepClone(DEFAULT_PROTOCOLS[activeMode]);
+      renderAll();
+      saveState();
+      calculateDose();
+      hideError();
+    }
+
+    function computeTDD() {
+      const weight = Number(settings.weightKg);
+      const unitsPerKg = Number(settings.unitsPerKg);
+      if (!Number.isFinite(weight) || weight <= 0 || !Number.isFinite(unitsPerKg) || unitsPerKg <= 0) {
+        return null;
+      }
+      return weight * unitsPerKg;
+    }
+
+    function computeBasalBolus(tdd) {
+      const basalFraction = Number(settings.basalSplit) / 100;
+      const basal = tdd * basalFraction;
+      const bolus = tdd * (1 - basalFraction);
+      return { basal, bolus };
+    }
+
+    function computeICR(tdd) {
+      return tdd > 0 ? 500 / tdd : null;
+    }
+
+    function computeISF(tdd) {
+      return tdd > 0 ? 1800 / tdd : null;
+    }
+
+    function getCorrectionDose(bg, target, isf) {
+      if (!Number.isFinite(bg) || !Number.isFinite(target) || !Number.isFinite(isf) || isf <= 0) return null;
+      return Math.max((bg - target) / isf, 0);
+    }
+
+    function getCarbDose(grams, icr) {
+      if (!Number.isFinite(grams) || !Number.isFinite(icr) || icr <= 0) return null;
+      return grams / icr;
+    }
+
     function calculateDose() {
       const bgRaw = bgInput.value.trim();
       const bg = Number(bgRaw);
       const meal = mealSelect.value;
-      const protocol = PROTOCOLS[activeMode];
+      const protocol = protocols[activeMode];
 
       if (bgRaw === "" || !Number.isFinite(bg)) {
         showError("Please enter a valid blood glucose value.");
         return;
       }
-
       if (bg < 50 || bg > 500) {
         showError("Please enter a blood glucose value between 50 and 500 mg/dL.");
         return;
       }
 
+      const tdd = computeTDD();
+      const basalBolus = tdd ? computeBasalBolus(tdd) : null;
+      const icr = tdd ? computeICR(tdd) : null;
+      const isf = tdd ? computeISF(tdd) : null;
       const category = getBgCategory(bg);
-      const dose = protocol.matrix[category][meal];
+      const matrixDose = Number(protocol.matrix[category][meal]);
+      const target = Number(settings.targetBg);
+      const carbs = Number(carbEstimate.value);
+      const carbDose = getCarbDose(carbs, icr);
+      const correction = getCorrectionDose(bg, target, isf);
+      const roundingIncrement = Number(settings.roundingMode);
+
+      let suggested = matrixDose;
+      let sourceLabel = "Protocol matrix";
+
+      if (doseMethod.value === "tdb") {
+        const total = (carbDose || 0) + (correction || 0);
+        suggested = roundToIncrement(total, roundingIncrement);
+        sourceLabel = "TDD / ICR / ISF";
+      }
 
       const mealLabel = mealSelect.options[mealSelect.selectedIndex].text;
       const bgLabel = category === "low" ? "<150" : category === "medium" ? "150–249" : ">250";
 
-      resultValue.textContent = `Recommended Dose: ${dose} units`;
-      resultMeta.textContent = `${protocol.label} | BG ${bgLabel} | ${mealLabel}`;
+      resultValue.textContent = `Recommended dose: ${fmt(suggested, roundingIncrement === 1 ? 0 : 1)} units`;
+      resultMeta.textContent = `${protocol.label} | BG ${bgLabel} | ${mealLabel} | Source: ${sourceLabel}`;
       resultCard.style.borderLeftColor = activeMode === "sliding" ? "#2563eb" : "#7c3aed";
+
+      tddValue.textContent = tdd ? `${fmt(tdd, 1)} U/day` : "—";
+      basalValue.textContent = basalBolus ? `${fmt(basalBolus.basal, 1)} U/day` : "—";
+      bolusValue.textContent = basalBolus ? `${fmt(basalBolus.bolus, 1)} U/day` : "—";
+      targetBgValue.textContent = `${fmt(target, 0)} mg/dL`;
+
+      if (tdd && icr && isf) {
+        suggestedDoseText.innerHTML = `
+          <strong>${sourceLabel}:</strong> ${fmt(suggested, roundingIncrement === 1 ? 0 : 1)} units<br>
+          <span class="muted">TDD ${fmt(tdd, 1)} U/day | ICR 1:${fmt(icr, 1)} g/unit | ISF ${fmt(isf, 1)} mg/dL per unit | Carb estimate ${carbs} g | Target ${fmt(target, 0)} mg/dL</span>
+        `;
+      } else {
+        suggestedDoseText.textContent = `Suggested dose source: ${sourceLabel}`;
+      }
+
       hideError();
     }
 
-    async function captureActiveTable() {
-      const canvas = await html2canvas(exportArea, {
+    function buildExportClone(mode) {
+      const wrapper = document.createElement("div");
+      wrapper.style.position = "fixed";
+      wrapper.style.left = "-99999px";
+      wrapper.style.top = "0";
+      wrapper.style.width = "1100px";
+      wrapper.style.background = "#ffffff";
+      wrapper.style.padding = "16px";
+      wrapper.innerHTML = `
+        <div style="font-family: Arial, Helvetica, sans-serif; color: #1f2937;">
+          <h2 style="margin: 0 0 8px;">${protocols[mode].label}</h2>
+          <p style="margin: 0 0 12px; color: #6b7280;">Exported dose table</p>
+          ${buildDisplayTable(mode)}
+          <div style="margin-top: 10px; font-size: 12px; color: #6b7280;">
+            Source notes: ADA individualized care framework; ADA hospital glycemic targets; Endotext TDD / basal-bolus / 500-rule / 1800-rule framework.
+          </div>
+        </div>
+      `;
+      document.body.appendChild(wrapper);
+      return wrapper;
+    }
+
+    async function captureTable(mode) {
+      const tempWrap = buildExportClone(mode);
+      const canvas = await html2canvas(tempWrap, {
         scale: 2,
         backgroundColor: "#ffffff",
         useCORS: true
       });
-
-      return { canvas, label: PROTOCOLS[activeMode].label };
+      document.body.removeChild(tempWrap);
+      return { canvas, label: protocols[mode].label };
     }
 
     function downloadCanvasAsPng(canvas, filename) {
@@ -770,9 +1168,9 @@
       link.click();
     }
 
-    async function exportAsPng() {
+    async function exportTableAsPng(mode) {
       try {
-        const { canvas, label } = await captureActiveTable();
+        const { canvas, label } = await captureTable(mode);
         const stamp = new Date().toISOString().slice(0, 10);
         downloadCanvasAsPng(canvas, `${label.replace(/\s+/g, "_").toLowerCase()}_${stamp}.png`);
       } catch (err) {
@@ -781,20 +1179,17 @@
       }
     }
 
-    async function exportAsPdf() {
+    async function exportTableAsPdf(mode) {
       try {
-        const { canvas, label } = await captureActiveTable();
+        const { canvas, label } = await captureTable(mode);
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF("p", "pt", "a4");
-
         const pageWidth = pdf.internal.pageSize.getWidth();
         const margin = 24;
         const imgWidth = pageWidth - margin * 2;
         const imgHeight = canvas.height * imgWidth / canvas.width;
         const imgData = canvas.toDataURL("image/png");
-
         pdf.addImage(imgData, "PNG", margin, margin, imgWidth, imgHeight);
-
         const stamp = new Date().toISOString().slice(0, 10);
         pdf.save(`${label.replace(/\s+/g, "_").toLowerCase()}_${stamp}.pdf`);
       } catch (err) {
@@ -803,12 +1198,84 @@
       }
     }
 
+    function openSettings() {
+      settingsModal.classList.add("show");
+      settingsModal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeSettings() {
+      settingsModal.classList.remove("show");
+      settingsModal.setAttribute("aria-hidden", "true");
+    }
+
+    function saveSettings() {
+      const weightKg = Number(weightKgInput.value);
+      const unitsPerKg = Number(unitsPerKgInput.value);
+      const basalSplit = Number(basalSplitInput.value);
+      const targetPreset = targetPresetInput.value;
+      let targetBg = Number(targetBgInput.value);
+      const roundingMode = Number(roundingModeInput.value);
+
+      if (!Number.isFinite(weightKg) || weightKg <= 0) {
+        showError("Weight must be a positive number.");
+        return;
+      }
+      if (!Number.isFinite(unitsPerKg) || unitsPerKg <= 0) {
+        showError("Units/kg/day must be a positive number.");
+        return;
+      }
+      if (!Number.isFinite(basalSplit) || basalSplit < 0 || basalSplit > 100) {
+        showError("Basal share must be between 0 and 100.");
+        return;
+      }
+      if (targetPreset !== "custom") {
+        targetBg = Number(targetPreset);
+      }
+      if (!Number.isFinite(targetBg) || targetBg < 70 || targetBg > 200) {
+        showError("Target BG must be between 70 and 200 mg/dL.");
+        return;
+      }
+      if (![0.5, 1].includes(roundingMode)) {
+        showError("Rounding mode must be 0.5 or 1.");
+        return;
+      }
+
+      settings = {
+        weightKg,
+        unitsPerKg,
+        basalSplit,
+        targetBg,
+        roundingMode
+      };
+
+      syncSettingsForm();
+      saveState();
+      calculateDose();
+      closeSettings();
+      hideError();
+    }
+
+    function restoreDefaultSettings() {
+      settings = deepClone(DEFAULT_SETTINGS);
+      syncSettingsForm();
+      saveState();
+      calculateDose();
+      hideError();
+    }
+
     btnSliding.addEventListener("click", () => setActiveMode("sliding"));
     btnFixed.addEventListener("click", () => setActiveMode("fixed"));
     calcBtn.addEventListener("click", calculateDose);
     applyBtn.addEventListener("click", applyEditorValues);
-    exportPngBtn.addEventListener("click", exportAsPng);
-    exportPdfBtn.addEventListener("click", exportAsPdf);
+    resetBtn.addEventListener("click", resetActiveProtocol);
+    settingsBtn.addEventListener("click", openSettings);
+    closeSettingsBtn.addEventListener("click", closeSettings);
+    saveSettingsBtn.addEventListener("click", saveSettings);
+    restoreSettingsBtn.addEventListener("click", restoreDefaultSettings);
+    exportActivePngBtn.addEventListener("click", () => exportTableAsPng(activeMode));
+    exportActivePdfBtn.addEventListener("click", () => exportTableAsPdf(activeMode));
+    exportSlidingPngBtn.addEventListener("click", () => exportTableAsPng("sliding"));
+    exportFixedPdfBtn.addEventListener("click", () => exportTableAsPdf("fixed"));
 
     bgInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
@@ -817,8 +1284,45 @@
       }
     });
 
-    setActiveMode("sliding");
-    renderTables();
+    targetPresetInput.addEventListener("change", () => {
+      const preset = targetPresetInput.value;
+      if (preset !== "custom") {
+        targetBgInput.value = preset;
+        targetBgInput.disabled = true;
+      } else {
+        targetBgInput.disabled = false;
+      }
+    });
+
+    doseMethod.addEventListener("change", calculateDose);
+    carbEstimate.addEventListener("change", calculateDose);
+    weightKgInput.addEventListener("input", calculateDose);
+    unitsPerKgInput.addEventListener("change", calculateDose);
+    basalSplitInput.addEventListener("change", calculateDose);
+    targetBgInput.addEventListener("input", calculateDose);
+    roundingModeInput.addEventListener("change", calculateDose);
+
+    settingsModal.addEventListener("click", (e) => {
+      if (e.target === settingsModal) closeSettings();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeSettings();
+    });
+
+    document.getElementById("targetPreset").addEventListener("change", () => {
+      const preset = targetPresetInput.value;
+      targetBgInput.disabled = preset !== "custom";
+      if (preset !== "custom") targetBgInput.value = preset;
+      calculateDose();
+    });
+
+    // initialize disabled state for target field
+    targetBgInput.disabled = targetPresetInput.value !== "custom";
+
+    saveState();
+    renderAll();
+    calculateDose();
   </script>
 </body>
 </html>
